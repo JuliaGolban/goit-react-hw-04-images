@@ -14,7 +14,7 @@
 
 # Admission criteria
 
-- Created the `goit-react-hw-03-image-finder`.
+- Created the `goit-react-hw-04-image`.
 - When submitting homework, there are two links: to the source files and the
   working pages of each assignment on `GitHub Pages`.
 - The component state stores the minimum required set of data, The rest is
@@ -23,12 +23,11 @@
 - For each component has a separate folder with the React-component file and
   styles file.
 - For the components are described `propTypes`.
-- Everything that a component expects in the form of props is passed to it when
-  it is called.
-- JS-code is clean and clear, `Prettier` is used.
-- Styling is done by `CSS modules` or `Styled Components`.
+- Component names are clear, descriptive.
 
-## 2 - Image Search.
+**_Refactor the "Image Search" task from module 3 using React-hooks._**
+
+## Previous task - Image Search.
 
 Write a keyword image search application. Preview of a working application
 [see link](https://drive.google.com/file/d/1oXCGyiq4uKwW0zzraZLKk4lh3voBlBzZ/view?usp=sharing).
