@@ -1,7 +1,7 @@
 import axios from 'axios';
 import PropTypes from 'prop-types';
 
-const BASE_URL = 'https://pixabay.com/api/';
+axios.defaults.baseURL = 'https://pixabay.com/api/';
 const API_KEY = '29751149-7f03b7bad417db024d5002aea';
 
 const fetchImages = ({ searchQuery, currentPage, pageSize }) => {
@@ -15,7 +15,7 @@ const fetchImages = ({ searchQuery, currentPage, pageSize }) => {
     per_page: pageSize,
   });
 
-  return axios.get(`${BASE_URL}?${searchParams}`);
+  return axios.get(`?${searchParams}`);
 };
 
 fetchImages.propTypes = {

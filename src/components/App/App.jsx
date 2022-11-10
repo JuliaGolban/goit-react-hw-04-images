@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import fetchImages from '../services/apiService';
 import Searchbar from '../Searchbar/Searchbar';
 import Title from '../Title/Title';
@@ -13,138 +13,135 @@ import css from './App.module.css';
 const notify = new NotifyMessages();
 const loader = new NotiflixLoading();
 
-const INITIAL_STATE = {
-  images: [],
-  searchQuery: '',
-  currentPage: 1,
-  pageSize: 12,
-  isLoading: false,
-  showModal: false,
-  showScroll: false,
-  error: null,
+const App = () => {
+  // const [options, setOptions] = useState({
+  //   searchQuery: '',
+  //   currentPage: 1,
+  //   pageSize: 12,
+  // });
+
+  const [images, setImages] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalHits, setTotalHits] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalDescr, setModalDescr] = useState('');
+  const [modalImg, setModalImg] = useState('');
+  const [showScroll, setShowScroll] = useState(false);
+  const [error, setError] = useState(null);
+
+  const totalPage = Math.ceil(totalHits / pageSize);
+
+  useEffect(() => {
+    if (searchQuery === '') return;
+
+    async function getImages() {
+      setIsLoading(true);
+      const options = { searchQuery, currentPage, pageSize };
+
+      try {
+        const { data } = await fetchImages(options);
+        setImages(state => [...state, ...data.hits]);
+        setTotalHits(data.totalHits);
+        setShowScroll(true);
+        setError(null);
+        handleMessages(data);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    const handleMessages = data => {
+      if (data.totalHits !== 0 && currentPage === 1) {
+        notify.onTotalImages(data.totalHits);
+      }
+      if (data.total === 0) {
+        return notify.onFetchError();
+      }
+    };
+
+    getImages();
+  }, [currentPage, pageSize, searchQuery]);
+
+  const handleFormSubmit = searchQuery => {
+    reset();
+    setSearchQuery(searchQuery);
+  };
+
+  const handleLoadMore = () => {
+    incrementCurrentPage();
+  };
+
+  const handleModal = (modalDescr, modalImg) => {
+    setModalDescr(modalDescr);
+    setModalImg(modalImg);
+    toggleModal();
+  };
+
+  const toggleModal = () => {
+    setShowModal(!showModal);
+  };
+
+  const incrementCurrentPage = () => {
+    setCurrentPage(state => state + 1);
+  };
+
+  // const incrementCurrentPage = currentPage => {
+  //   setOptions(state => ({
+  //     ...state,
+  //     [currentPage]: state[currentPage] + 1,
+  //   }));
+  // };
+
+  const reset = () => {
+    setImages([]);
+    setSearchQuery('');
+    setCurrentPage(1);
+    setPageSize(12);
+    setTotalHits(0);
+    setIsLoading(false);
+    setShowModal(false);
+    setModalDescr('');
+    setModalImg('');
+    setShowScroll(false);
+    setError(null);
+  };
+
+  return (
+    <div className={css.App}>
+      <Searchbar onSubmit={handleFormSubmit} />
+
+      {error && <Title text="Whoops, something went wrong" />}
+
+      {images.length === 0 && !error && (
+        <Title text="Let's find whatever you want!.." />
+      )}
+
+      {isLoading ? loader.onLoading() : loader.onLoaded()}
+
+      {images.length > 0 && !isLoading && (
+        <ImageGalleryList images={images} onImageClick={handleModal} />
+      )}
+
+      {currentPage < totalPage && !isLoading && (
+        <TextButton text="Load more" onClick={handleLoadMore} />
+      )}
+
+      {showModal && (
+        <Modal
+          onClick={toggleModal}
+          modalImg={modalImg}
+          modalDescr={modalDescr}
+        />
+      )}
+
+      {showScroll && images.length > 0 && !isLoading && <ScrollToTop />}
+    </div>
+  );
 };
-
-class App extends Component {
-  state = { ...INITIAL_STATE };
-
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.searchQuery !== this.state.searchQuery ||
-      prevState.currentPage !== this.state.currentPage
-    ) {
-      this.getImages();
-    }
-  }
-
-  async getImages() {
-    this.setState({ isLoading: true });
-    const { currentPage, searchQuery, pageSize } = this.state;
-    const options = { searchQuery, currentPage, pageSize };
-
-    try {
-      const { data } = await fetchImages(options);
-      this.setState(prevState => ({
-        images: [...prevState.images, ...data.hits],
-        total: data.total,
-        totalHits: data.totalHits,
-        showScroll: true,
-        error: null,
-      }));
-      this.handleMessages(data);
-    } catch (error) {
-      this.setState({ error });
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  }
-
-  handleFormSubmit = searchQuery => {
-    this.reset();
-    this.setState({ searchQuery });
-  };
-
-  handleLoadMore = () => {
-    this.incrementCurrentPage();
-  };
-
-  handleMessages = data => {
-    if (data.totalHits !== 0 && this.state.currentPage === 1) {
-      notify.onTotalImages(data.totalHits);
-    }
-    if (data.total === 0) {
-      return notify.onFetchError();
-    }
-  };
-
-  handleModal = (modalDescr, modalImg) => {
-    this.setState({ modalDescr, modalImg });
-    this.toggleModal();
-  };
-
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-  };
-
-  incrementCurrentPage = () => {
-    this.setState(prevState => ({
-      currentPage: prevState.currentPage + 1,
-    }));
-  };
-
-  reset = () => {
-    this.setState({ ...INITIAL_STATE });
-  };
-
-  render() {
-    const {
-      images,
-      currentPage,
-      pageSize,
-      totalHits,
-      isLoading,
-      showModal,
-      showScroll,
-      modalImg,
-      modalDescr,
-      error,
-    } = this.state;
-
-    const totalPage = Math.ceil(totalHits / pageSize);
-
-    return (
-      <div className={css.App}>
-        <Searchbar onSubmit={this.handleFormSubmit} />
-
-        {error && <Title text="Whoops, something went wrong" />}
-
-        {images.length === 0 && !error && (
-          <Title text="Let's find whatever you want!.." />
-        )}
-
-        {isLoading ? loader.onLoading() : loader.onLoaded()}
-
-        {images.length > 0 && !isLoading && (
-          <ImageGalleryList images={images} onImageClick={this.handleModal} />
-        )}
-
-        {currentPage < totalPage && !isLoading && (
-          <TextButton text="Load more" onClick={this.handleLoadMore} />
-        )}
-
-        {showModal && (
-          <Modal
-            onClick={this.toggleModal}
-            modalImg={modalImg}
-            modalDescr={modalDescr}
-          />
-        )}
-
-        {showScroll && images.length > 0 && !isLoading && <ScrollToTop />}
-      </div>
-    );
-  }
-}
 
 export default App;
