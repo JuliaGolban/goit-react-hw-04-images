@@ -14,12 +14,6 @@ const notify = new NotifyMessages();
 const loader = new NotiflixLoading();
 
 const App = () => {
-  // const [options, setOptions] = useState({
-  //   searchQuery: '',
-  //   currentPage: 1,
-  //   pageSize: 12,
-  // });
-
   const [images, setImages] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +34,6 @@ const App = () => {
     async function getImages() {
       setIsLoading(true);
       const options = { searchQuery, currentPage, pageSize };
-
       try {
         const { data } = await fetchImages(options);
         setImages(state => [...state, ...data.hits]);
@@ -64,7 +57,17 @@ const App = () => {
       }
     };
 
+    const handleScroll = () => {
+      document.addEventListener('scroll', () => {
+        const GOLDEN_RATIO = 0.5;
+        document.documentElement.scrollTop > GOLDEN_RATIO
+          ? setShowScroll(true)
+          : setShowScroll(false);
+      });
+    };
+
     getImages();
+    handleScroll();
   }, [currentPage, pageSize, searchQuery]);
 
   const handleFormSubmit = searchQuery => {
@@ -90,13 +93,6 @@ const App = () => {
     setCurrentPage(state => state + 1);
   };
 
-  // const incrementCurrentPage = currentPage => {
-  //   setOptions(state => ({
-  //     ...state,
-  //     [currentPage]: state[currentPage] + 1,
-  //   }));
-  // };
-
   const reset = () => {
     setImages([]);
     setSearchQuery('');
@@ -114,23 +110,17 @@ const App = () => {
   return (
     <div className={css.App}>
       <Searchbar onSubmit={handleFormSubmit} />
-
       {error && <Title text="Whoops, something went wrong" />}
-
       {images.length === 0 && !error && (
         <Title text="Let's find whatever you want!.." />
       )}
-
       {isLoading ? loader.onLoading() : loader.onLoaded()}
-
       {images.length > 0 && !isLoading && (
         <ImageGalleryList images={images} onImageClick={handleModal} />
       )}
-
       {currentPage < totalPage && !isLoading && (
         <TextButton text="Load more" onClick={handleLoadMore} />
       )}
-
       {showModal && (
         <Modal
           onClick={toggleModal}

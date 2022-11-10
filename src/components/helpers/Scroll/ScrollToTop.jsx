@@ -7,16 +7,20 @@ export default class ScrollToTop extends Component {
     isScroll: false,
   };
 
+  scrollBy() {
+    const { height: cardHeight } = document
+      .querySelector('#gallery')
+      .firstElementChild.getBoundingClientRect();
+
+    return window.scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
+    });
+  }
+
   scrollToTop() {
     const start = document.querySelector('#header');
     return window.scrollTo({ top: start, behavior: 'smooth' });
-  }
-
-  handleScrollToTop() {
-    const GOLDEN_RATIO = 0.5;
-    document.documentElement.scrollTop > GOLDEN_RATIO
-      ? this.setState({ isScroll: true })
-      : this.setState({ isScroll: false });
   }
 
   render() {

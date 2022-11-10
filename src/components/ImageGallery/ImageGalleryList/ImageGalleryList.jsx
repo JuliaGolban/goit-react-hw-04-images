@@ -5,7 +5,7 @@ import css from './ImageGalleryList.module.css';
 
 const ImageGalleryList = ({ images, ...otherProps }) => {
   return (
-    <ul className={css.gallery}>
+    <ul className={css.gallery} id="gallery">
       {images.map(({ id, webformatURL, largeImageURL, tags }) => (
         <ImageGalleryItem
           key={id}
