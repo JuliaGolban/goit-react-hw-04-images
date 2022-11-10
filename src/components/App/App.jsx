@@ -55,17 +55,17 @@ const App = () => {
       }
     }
 
-    const handleMessages = data => {
-      if (data.totalHits !== 0 && currentPage === 1) {
-        notify.onTotalImages(data.totalHits);
-      }
-      if (data.total === 0) {
-        return notify.onFetchError();
-      }
-    };
-
     getImages();
   }, [currentPage, pageSize, searchQuery]);
+
+  const handleMessages = data => {
+    if (data.totalHits !== 0 && currentPage === 1) {
+      notify.onTotalImages(data.totalHits);
+    }
+    if (data.total === 0) {
+      return notify.onFetchError();
+    }
+  };
 
   const handleFormSubmit = searchQuery => {
     reset();
